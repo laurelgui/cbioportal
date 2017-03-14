@@ -2966,7 +2966,7 @@ def request_from_portal_api(server_url, api_name, logger):
     """Send a request to the portal API and return the decoded JSON object."""    
     
     if api_name == 'genesets':
-        service_url = server_url + '/api/' + api_name
+        service_url = server_url + '/api/' + api_name + "?pageSize=999999999"
 
     # TODO: change API for genes, gene aliases and cancer types to non-legacy
     else:
