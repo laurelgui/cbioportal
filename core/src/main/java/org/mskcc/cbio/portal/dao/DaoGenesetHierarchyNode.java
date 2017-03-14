@@ -33,7 +33,6 @@ import org.mskcc.cbio.portal.model.GenesetHierarchy;
 
 public class DaoGenesetHierarchyNode {
 	
-	// Keep Constructor empty
 	private DaoGenesetHierarchyNode() {
 	}
     
@@ -78,7 +77,6 @@ public class DaoGenesetHierarchyNode {
         }
 	}
 
-
     /**
      * Retrieve gene set hierarchy object from geneset_hierarchy_node table in database to check if table if filled.
      * @throws DaoException 
@@ -98,20 +96,15 @@ public class DaoGenesetHierarchyNode {
             // Execute statement
             resultSet = preparedStatement.executeQuery();
             
-            // return null if result set is empty
-            if (resultSet.next()){
+            // return false if result set is empty
+            return resultSet.next();
             
-            	//ResultSet is filled
-            	return true;
-            }
-            return false;
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
             JdbcUtil.closeAll(DaoGenesetHierarchyNode.class, connection, preparedStatement, resultSet);
         }
 	}
-
 
     /**
      * Deletes all records from 'geneset_hierarchy_node' table in database.
@@ -134,5 +127,4 @@ public class DaoGenesetHierarchyNode {
             JdbcUtil.closeAll(DaoGenesetHierarchyNode.class, connection, preparedStatement, resultSet);
         }
     }
-    
 }

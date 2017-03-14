@@ -34,7 +34,6 @@ import org.mskcc.cbio.portal.model.GenesetHierarchyLeaf;
 
 public class DaoGenesetHierarchyLeaf {
 
-	// Keep Constructor empty
 	private DaoGenesetHierarchyLeaf() {
 	}
     

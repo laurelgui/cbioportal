@@ -27,7 +27,9 @@
 
 package org.mskcc.cbio.portal.model;
 
-public class GenesetHierarchy {
+import java.io.Serializable;
+
+public class GenesetHierarchy implements Serializable {
 
 	private int nodeId;
 	private String nodeName;

@@ -32,7 +32,6 @@ import org.mskcc.cbio.portal.model.*;
 
 public class DaoGeneticProfileLink {
 	
-	// Keep Constructor empty
 	private DaoGeneticProfileLink() {
 	}
 	

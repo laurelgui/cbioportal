@@ -2652,11 +2652,11 @@ class GsvaWiseFileValidator(FeaturewiseFileValidator):
 
 
 class GsvaScoreValidator(GsvaWiseFileValidator):
-    """Validator for files containing scores per gegene setrom GSVA algorithm.
-
-    GSVA is an algorithm in R that outputs a score and p-value (from 
-    bootstrapping for each inputted gene set per sample.
+    
+    """ Validator for files containing scores per gene set from GSVA algorithm. The GSVA algorithm
+    in R can calculate a GSVA score or GSVA-like score (such as ssGSEA) per sample per gene set.
     """
+    
     # Score must be between -1 and 1
     def checkValue(self, value, col_index):
         """Check a value in a sample column."""
@@ -2670,11 +2670,11 @@ class GsvaScoreValidator(GsvaWiseFileValidator):
      
  
 class GsvaPvalueValidator(GsvaWiseFileValidator):
-    """Validator for files containing p-values per gene set from GSVA algorithm.
-
-    GSVA is an algorithm in R that outputs a score and p-value (from bootstrapping)
-    for each inputted gene set per sample.
+    
+    """ Validator for files containing p-values for GSVA scores. The GSVA algorithm in R can
+    calculate a p-value for each GSVA score using a bootstrapping method. 
     """
+    
     # Score must be between -0 and 1
     def checkValue(self, value, col_index):
         """Check a value in a sample column."""
@@ -2880,8 +2880,9 @@ def validate_defined_caselists(cancer_study_id, case_list_ids, file_types, logge
     # TODO: check for required suffixes based on the defined profiles
     
 def validate_dependencies(validators_by_meta_type, logger):
-    """
-    Validation after all meta files are individually validated.
+    
+    """Validation after all meta files are individually validated.
+    
     Here we validate that the required cross-linking between expression,
     zscore, gsva score and gsva pvalue files is present in the form of 
     source_stable_id, which is used to link the profiles to each other.

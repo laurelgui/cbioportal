@@ -32,7 +32,6 @@ import org.mskcc.cbio.portal.model.GenesetInfo;
 
 public class DaoGenesetInfo {
 	
-	// Keep Constructor empty
 	private DaoGenesetInfo() {
 	}
 	
@@ -118,5 +117,3 @@ public class DaoGenesetInfo {
 	    }
     }
 }
-
-

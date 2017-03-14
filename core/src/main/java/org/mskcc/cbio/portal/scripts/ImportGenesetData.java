@@ -103,9 +103,7 @@ public class ImportGenesetData extends ConsoleRunnable {
             genesetInfo = new GenesetInfo();
             genesetInfo.setVersion(options.valueOf(newVersionArgument));
             
-            // Check if gene set tables are empty. In that case, no extra argument is required
-
-        	// Geneset tables are not empty. Need to specify if we update info or add new version
+        	// Required to specify if we update info or add new version
             if ((!updateInfo && !newVersion) || (updateInfo && newVersion)) {      
                 throw new UsageException(
                         progName, description, parser,
@@ -130,7 +128,8 @@ public class ImportGenesetData extends ConsoleRunnable {
             	
         	// In case of new version
             } else {
-            	
+
+                // Check if gene set tables are empty. In that case, it's not necessary to ask user to remove previous data.
             	if (databaseVersionValue == null) {
 	            	ProgressMonitor.setCurrentMessage("New version of gene sets specified. Loading to empty database.");
             		DaoGeneset.deleteAllRecords();

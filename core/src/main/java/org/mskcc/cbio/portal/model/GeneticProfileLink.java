@@ -27,7 +27,10 @@
 
 package org.mskcc.cbio.portal.model;
 
-public class GeneticProfileLink {
+import java.io.Serializable;
+
+public class GeneticProfileLink implements Serializable {
+	
 	private int referringGeneticProfileId;
 	private int referredGeneticProfileId;
 	private String referenceType;

@@ -48,11 +48,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class DaoGeneset {
-    
-	// Keep Constructor empty
+
 	private DaoGeneset() {
 	}
-    
+
     /**
      * Adds a new Geneset record to the database.
      * @param geneset
@@ -129,8 +128,7 @@ public class DaoGeneset {
                 pstmt.setInt(1, geneset.getId());
                 pstmt.setLong(2, entrezGeneId);
                 rows += pstmt.executeUpdate();
-            }
-            
+            }       
             return rows;
         }
         catch (SQLException e) {
@@ -140,8 +138,7 @@ public class DaoGeneset {
             JdbcUtil.closeAll(DaoGeneset.class, con, pstmt, rs);
         }
         
-    }
-    
+    }   
     
     /**
      * Given a Geneset record, returns list of CanonicalGene records.
@@ -184,7 +181,6 @@ public class DaoGeneset {
         }
     }
     
-    
     /**
      * Given an external id, returns a Geneset record.
      * @param externalId
@@ -216,7 +212,6 @@ public class DaoGeneset {
             JdbcUtil.closeAll(DaoGeneset.class, con, pstmt, rs);
         }
     }
-
     
     /**
      * Get Geneset record.
@@ -229,10 +224,8 @@ public class DaoGeneset {
             con = JdbcUtil.getDbConnection(DaoGeneset.class);
             pstmt = con.prepareStatement("SELECT * FROM geneset WHERE ID = ?");
             pstmt.setInt(1, genesetId);
-            System.out.println(pstmt);
             rs = pstmt.executeQuery();
             if (rs.next()) {
-                //return extractGene(rs);
             	return extractGeneset(rs);
             } else {
                 return null;
@@ -243,7 +236,6 @@ public class DaoGeneset {
             JdbcUtil.closeAll(DaoGeneset.class, con, pstmt, rs);
         }
     }
-
     
     /**
      * Extracts Geneset record from ResultSet.
@@ -270,11 +262,9 @@ public class DaoGeneset {
         List<CanonicalGene> genesetGenes = getGenesetGenes(geneset);
         if (genesetGenes != null && genesetGenes.size() > 0) {
             geneset.setGenesetGenes(genesetGenes.stream().map(g -> g.getEntrezGeneId()).collect(Collectors.toSet()));
-        }
-        
+        }     
         return geneset;
     }
-    
     
     public static Set<Long> getGenesetGeneticEntityIds() throws DaoException {
         Connection con = null;
@@ -296,9 +286,7 @@ public class DaoGeneset {
         } finally {
             JdbcUtil.closeAll(DaoGeneset.class, con, pstmt, rs);
         }
-    }
-    
- 
+    }  
     
     /**
      * Checks the usage of a geneset by genetic entity id.
@@ -308,8 +296,7 @@ public class DaoGeneset {
      */
     public static boolean checkUsage(Integer geneticEntityId) throws DaoException {
         String SQL = "SELECT COUNT(DISTINCT `CANCER_STUDY_ID`) FROM genetic_profile " +
-                "WHERE `GENETIC_PROFILE_ID` IN (SELECT `GENETIC_PROFILE_ID` FROM genetic_alteration WHERE `GENETIC_ENTITY_ID` = ?)";
-        
+                "WHERE `GENETIC_PROFILE_ID` IN (SELECT `GENETIC_PROFILE_ID` FROM genetic_alteration WHERE `GENETIC_ENTITY_ID` = ?)";      
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -359,7 +346,6 @@ public class DaoGeneset {
             JdbcUtil.closeAll(DaoGeneset.class, con, pstmt, rs);
         }
     }
-
     
     /**
      * Delete Geneset genetic entity records.
@@ -377,8 +363,7 @@ public class DaoGeneset {
         } finally {
             JdbcUtil.closeAll(DaoGeneset.class, con, pstmt, rs);
         }
-    }
-    
+    }   
     
     /**
      * Deletes Geneset data such as GSVA Scores and Pvalues by genetic entity id
@@ -429,10 +414,9 @@ public class DaoGeneset {
         } 
         finally {
             JdbcUtil.closeAll(DaoGeneset.class, connection, preparedStatement, resultSet);
-        }
-		
+        }	
 	}    
-    
+
     /**
      * Deletes all records from 'geneset' table in database and records in related tables.
      * @throws DaoException 
@@ -455,7 +439,6 @@ public class DaoGeneset {
         }
     }
     
-    
     /**
      * Deletes all records from 'geneset' table in database and records in related tables.
      * @throws DaoException 
@@ -468,5 +451,3 @@ public class DaoGeneset {
     	DaoGenesetHierarchyNode.deleteAllGenesetHierarchyRecords();
     }
 }
-
-
