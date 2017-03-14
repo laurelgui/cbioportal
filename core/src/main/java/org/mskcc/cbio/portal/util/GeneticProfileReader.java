@@ -39,7 +39,6 @@ import java.util.Arrays;
 import java.util.Properties;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.model.CancerStudy;
-import org.mskcc.cbio.portal.model.GenesetInfo;
 import org.mskcc.cbio.portal.model.GeneticAlterationType;
 import org.mskcc.cbio.portal.model.GeneticProfile;
 import org.mskcc.cbio.portal.model.GeneticProfileLink;
@@ -161,10 +160,12 @@ public class GeneticProfileReader {
 	}
 
 	private static void validateGenesetProfile(GeneticProfile geneticProfile, File file) throws DaoException {
-    	GenesetInfo genesetInfo = DaoGenesetInfo.getGenesetInfo();
+    	String genesetVersion = DaoInfo.getGenesetVersion();
+    	
     	// TODO Auto-generated method stub
+    	
     	// Check if version is present in database
-    	if (genesetInfo.getVersion() == null) {
+    	if (genesetVersion == null) {
     		throw new RuntimeException("Attempted to import GENESET_SCORE data, but all gene set tables are empty. "
     				+ "Please load gene sets with ImportGenesetData.pl first.");
 
@@ -174,9 +175,9 @@ public class GeneticProfileReader {
     				+ "the same as the gene set version loaded with ImportGenesetData.pl .");
 
     		// Check if version is same as database version
-    	} else if (!geneticProfile.getOtherMetaDataField("geneset_def_version").equals(genesetInfo.getVersion())) {
+    	} else if (!geneticProfile.getOtherMetaDataField("geneset_def_version").equals(genesetVersion)) {
     		throw new RuntimeException("'geneset_def_version' property (" + geneticProfile.getOtherMetaDataField("geneset_def_version") +
-    				") in '" + file.getPath() + "' differs from database version (" + genesetInfo.getVersion() + ").");
+    				") in '" + file.getPath() + "' differs from database version (" + genesetVersion + ").");
     	}
 
     	// Prevent p-value profile to show up as selectable genomic profile

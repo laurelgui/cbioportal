@@ -43,7 +43,6 @@ import joptsimple.*;
 
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.model.Geneset;
-import org.mskcc.cbio.portal.model.GenesetInfo;
 import org.mskcc.cbio.portal.util.ProgressMonitor;
 
 
@@ -95,13 +94,10 @@ public class ImportGenesetData extends ConsoleRunnable {
             boolean confirmEmptyGenesets = options.has("confirm-delete-all-genesets-hierarchy-genesetprofiles");
             
             // Check current version
-            GenesetInfo genesetInfo = new GenesetInfo();
-            genesetInfo = DaoGenesetInfo.getGenesetInfo();
-            String databaseVersionValue = genesetInfo.getVersion();
+            String databaseGenesetVersion = DaoInfo.getGenesetVersion();
             
             // Check new version
-            genesetInfo = new GenesetInfo();
-            genesetInfo.setVersion(options.valueOf(newVersionArgument));
+            String newGenesetVersion = options.valueOf(newVersionArgument);
             
         	// Required to specify if we update info or add new version
             if ((!updateInfo && !newVersion) || (updateInfo && newVersion)) {      
@@ -115,7 +111,7 @@ public class ImportGenesetData extends ConsoleRunnable {
             } else if (updateInfo) {
 
             	// Check if there is something in the database before updating
-            	if (databaseVersionValue == null) {	
+            	if (databaseGenesetVersion == null) {
 	        		throw new UsageException(
 	                    progName, description, parser,
 	    				"Attempted to update gene sets, but gene set tables are empty. You can import with --new-version <Version>");
@@ -130,13 +126,13 @@ public class ImportGenesetData extends ConsoleRunnable {
             } else {
 
                 // Check if gene set tables are empty. In that case, it's not necessary to ask user to remove previous data.
-            	if (databaseVersionValue == null) {
+            	if (databaseGenesetVersion == null) {
 	            	ProgressMonitor.setCurrentMessage("New version of gene sets specified. Loading to empty database.");
             		DaoGeneset.deleteAllRecords();
 	            	
 	            	ProgressMonitor.setCurrentMessage("Adding new gene sets.\n");
 	            	startImport(options, data, supp, updateInfo, newVersion);
-	            	DaoGenesetInfo.setGenesetInfo(genesetInfo);
+	            	DaoInfo.setGenesetVersion(newGenesetVersion);
 
             	} else {
             		// If automatic confirm is not set, prompt the user with question to confirm.
@@ -164,7 +160,7 @@ public class ImportGenesetData extends ConsoleRunnable {
 	            	DaoGeneset.deleteAllRecords();
 	            	ProgressMonitor.setCurrentMessage("Adding new gene sets.");
 	            	startImport(options, data, supp, updateInfo, newVersion);
-            		DaoGenesetInfo.setGenesetInfo(genesetInfo);
+            		DaoInfo.setGenesetVersion(newGenesetVersion);
             	}
         		ProgressMonitor.setCurrentMessage("It is now possible to import gene set hierarchy data and gene set genetic profiles such as GSVA scores.");
             }
