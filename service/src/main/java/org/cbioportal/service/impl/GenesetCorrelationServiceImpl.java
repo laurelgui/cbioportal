@@ -37,12 +37,13 @@ import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.cbioportal.model.CancerStudy;
 import org.cbioportal.model.Gene;
 import org.cbioportal.model.GenesetCorrelation;
-import org.cbioportal.model.GenesetData;
-import org.cbioportal.model.GeneticData;
+import org.cbioportal.model.GenesetGeneticData;
+import org.cbioportal.model.GeneGeneticData;
 import org.cbioportal.model.GeneticProfile;
 import org.cbioportal.model.Sample;
+import org.cbioportal.model.GeneticProfile.DataType;
 import org.cbioportal.persistence.SampleListRepository;
-import org.cbioportal.service.GeneService;
+import org.cbioportal.service.GenesetService;
 import org.cbioportal.service.GenesetCorrelationService;
 import org.cbioportal.service.GenesetDataService;
 import org.cbioportal.service.GeneticDataService;
@@ -62,7 +63,7 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
     @Autowired
     private GeneticProfileService geneticProfileService;
     @Autowired
-    private GeneService geneService;
+    private GenesetService genesetService;
     @Autowired
     private SampleService sampleService;
     @Autowired
@@ -97,10 +98,10 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 		List<GenesetCorrelation> result = new ArrayList<GenesetCorrelation>();
 		
 		// find the genes in the geneset
-		List<Gene> genes = geneService.getGenesByGenesetId(genesetId);
+		List<Gene> genes = genesetService.getGenesByGenesetId(genesetId);
 		
         // the geneset data:
-        List<GenesetData> genesetData = genesetDataService.fetchGenesetData(geneticProfileId, sampleIds, Arrays.asList(genesetId));
+        List<GenesetGeneticData> genesetData = genesetDataService.fetchGenesetData(geneticProfileId, sampleIds, Arrays.asList(genesetId));
         double[] genesetValues = getGenesetValues(sampleIds, genesetData);
         // find the expression profile related to the given geneticProfileId
         List<GeneticProfile> expressionProfilesReferredByGenesetProfile = geneticProfileService.getGeneticProfilesReferredBy(geneticProfileId);
@@ -115,7 +116,7 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 		// get genetic data for each gene and calculate correlation
         for (Gene gene : genes) {
         	Integer entrezGeneId = gene.getEntrezGeneId();
-        	List<GeneticData> geneData = geneticDataService.fetchGeneticData(expressionProfile.getStableId(), sampleIds, 
+        	List<GeneGeneticData> geneData = geneticDataService.fetchGeneticData(expressionProfile.getStableId(), sampleIds, 
         			Arrays.asList(entrezGeneId), "SUMMARY");
         	FilteredGeneAndGenesetValues geneAndGenesetValues = getAndFilterValues(sampleIds, geneData, genesetValues);
         	
@@ -150,7 +151,7 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
     	GeneticProfile zscoresProfile = null;
     	for (GeneticProfile referringProfile : referringProfiles) {
     		//use the first z-score profile we can find in this list of referring profiles (normally there should be only 1 anyway):
-    		if (referringProfile.getDatatype().equals("Z-SCORE")) {
+    		if (referringProfile.getDatatype().equals(DataType.Z_SCORE)) {
     			zscoresProfile = referringProfile;
     			break;
     		}
@@ -195,11 +196,11 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 	 * @param genesetValues
 	 * @return
 	 */
-	private FilteredGeneAndGenesetValues getAndFilterValues(List<String> sampleIds, List<GeneticData> geneticDataItems, double[] genesetValues) {
+	private FilteredGeneAndGenesetValues getAndFilterValues(List<String> sampleIds, List<GeneGeneticData> geneticDataItems, double[] genesetValues) {
 		
 		//index geneData values
 		Map<String, Double> sampleValues = new HashMap<String, Double>();
-		for (GeneticData geneticDataItem : geneticDataItems) {
+		for (GeneGeneticData geneticDataItem : geneticDataItems) {
 			double value = Double.NaN;
 			if (NumberUtils.isNumber(geneticDataItem.getValue())) {
 				value = Double.parseDouble(geneticDataItem.getValue());
@@ -231,11 +232,11 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 	}
 
 
-	private double[] getGenesetValues(List<String> sampleIds, List<GenesetData> genesetDataItems) {
+	private double[] getGenesetValues(List<String> sampleIds, List<GenesetGeneticData> genesetDataItems) {
 
 		//index genesetData values
 		Map<String, Double> sampleValues = new HashMap<String, Double>();
-		for (GenesetData genesetDataItem : genesetDataItems) {
+		for (GenesetGeneticData genesetDataItem : genesetDataItems) {
 			double value = Double.NaN;
 			if (NumberUtils.isNumber(genesetDataItem.getValue())) {
 				value = Double.parseDouble(genesetDataItem.getValue());

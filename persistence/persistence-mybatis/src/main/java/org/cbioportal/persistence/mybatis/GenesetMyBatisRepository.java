@@ -42,4 +42,10 @@ public class GenesetMyBatisRepository implements GenesetRepository {
 		
 		return genesetMapper.getGenesetsByGenesetIds(genesetIds, projection);
 	}
+
+	@Override
+	public List<Gene> getGenesByGenesetId(String genesetId) {
+		
+		return genesetMapper.getGenesByGenesetId(genesetId, "SUMMARY");
+	}
 }

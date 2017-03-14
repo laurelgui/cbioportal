@@ -28,8 +28,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.cbioportal.model.GenesetAlteration;
-import org.cbioportal.model.GenesetData;
+import org.cbioportal.model.GenesetGeneticAlteration;
+import org.cbioportal.model.GenesetGeneticData;
 import org.cbioportal.model.GeneticProfile;
 import org.cbioportal.model.Sample;
 import org.cbioportal.persistence.GeneticDataRepository;
@@ -54,10 +54,10 @@ public class GenesetDataServiceImpl implements GenesetDataService {
     private SampleListRepository sampleListRepository;
 
     @Override
-	public List<GenesetData> fetchGenesetData(String geneticProfileId, List<String> sampleIds, List<String> genesetIds)
+	public List<GenesetGeneticData> fetchGenesetData(String geneticProfileId, List<String> sampleIds, List<String> genesetIds)
 			throws GeneticProfileNotFoundException {
 
-        List<GenesetData> genesetDataList = new ArrayList<>();
+        List<GenesetGeneticData> genesetDataList = new ArrayList<>();
 
         String commaSeparatedSampleIdsOfGeneticProfile = geneticDataRepository
             .getCommaSeparatedSampleIdsOfGeneticProfile(geneticProfileId);
@@ -78,18 +78,18 @@ public class GenesetDataServiceImpl implements GenesetDataService {
             samples = sampleService.fetchSamples(studyIds, sampleIds, "ID");
         }
 
-        List<GenesetAlteration> genesetAlterations = geneticDataRepository.getGenesetAlterations(geneticProfileId,
+        List<GenesetGeneticAlteration> genesetAlterations = geneticDataRepository.getGenesetAlterations(geneticProfileId,
         		genesetIds, "SUMMARY");
         
         for (Sample sample : samples) {
             int indexOfSampleId = internalSampleIds.indexOf(sample.getInternalId());
             if (indexOfSampleId != -1) {
-                for (GenesetAlteration genesetAlteration : genesetAlterations) {
-                    GenesetData genesetData = new GenesetData();
+                for (GenesetGeneticAlteration genesetAlteration : genesetAlterations) {
+                    GenesetGeneticData genesetData = new GenesetGeneticData();
                     genesetData.setGeneticProfileId(geneticProfileId);
                     genesetData.setSampleId(sample.getStableId());
                     genesetData.setGenesetId(genesetAlteration.getGenesetId());
-                    genesetData.setValue(genesetAlteration.getSplitValues()[indexOfSampleId]); //TODO introduce this "splitValues cache" in genetic data API as well...since .split(",") turned out to be bottleneck here...service went from 4s to 165ms after this improvement!
+                    genesetData.setValue(genesetAlteration.getSplitValues()[indexOfSampleId]);
                     genesetDataList.add(genesetData);
                 }
             }
@@ -99,7 +99,7 @@ public class GenesetDataServiceImpl implements GenesetDataService {
     }
 
 	@Override
-	public List<GenesetData> fetchGenesetData(String geneticProfileId, String sampleListId, List<String> genesetIds) throws GeneticProfileNotFoundException {
+	public List<GenesetGeneticData> fetchGenesetData(String geneticProfileId, String sampleListId, List<String> genesetIds) throws GeneticProfileNotFoundException {
 		//get list of samples for given sampleListId:
 		List<String> sampleIds = sampleListRepository.getAllSampleIdsInSampleList(sampleListId);
 		return fetchGenesetData(geneticProfileId, sampleIds, genesetIds);

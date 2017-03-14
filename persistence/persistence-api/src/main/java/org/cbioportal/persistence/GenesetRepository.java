@@ -2,6 +2,7 @@ package org.cbioportal.persistence;
 
 import java.util.List;
 
+import org.cbioportal.model.Gene;
 import org.cbioportal.model.Geneset;
 import org.cbioportal.model.meta.BaseMeta;
 
@@ -15,4 +16,5 @@ public interface GenesetRepository {
     
     List<Geneset> fetchGenesets(List<String> genesetIds, String projection);
     
+    List<Gene> getGenesByGenesetId(String genesetId);
 }

@@ -58,6 +58,4 @@ public interface GeneRepository {
     BaseMeta fetchMetaGenesByEntrezGeneIds(List<Integer> entrezGeneIds);
 
     BaseMeta fetchMetaGenesByHugoGeneSymbols(List<String> hugoGeneSymbols);
-    
-	List<Gene> getGenesByGenesetId(String genesetId);
 }

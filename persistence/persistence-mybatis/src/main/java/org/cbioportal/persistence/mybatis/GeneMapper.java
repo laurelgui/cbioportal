@@ -58,6 +58,4 @@ public interface GeneMapper {
     BaseMeta getMetaGenesByEntrezGeneIds(List<Integer> entrezGeneIds);
 
     BaseMeta getMetaGenesByHugoGeneSymbols(List<String> hugoGeneSymbols);
-    
-	List<Gene> getGenesByGenesetId(String genesetId, String projection);
 }

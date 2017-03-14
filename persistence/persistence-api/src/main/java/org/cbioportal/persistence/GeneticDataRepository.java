@@ -2,15 +2,15 @@ package org.cbioportal.persistence;
 
 import java.util.List;
 
-import org.cbioportal.model.GenesetAlteration;
-import org.cbioportal.model.GeneticAlteration;
+import org.cbioportal.model.GenesetGeneticAlteration;
+import org.cbioportal.model.GeneGeneticAlteration;
 
 public interface GeneticDataRepository {
 
     String getCommaSeparatedSampleIdsOfGeneticProfile(String geneticProfileId);
 
-    List<GeneticAlteration> getGeneticAlterations(String geneticProfileId, List<Integer> entrezGeneIds, 
+    List<GeneGeneticAlteration> getGeneticAlterations(String geneticProfileId, List<Integer> entrezGeneIds,
                                                   String projection);
 
-	List<GenesetAlteration> getGenesetAlterations(String geneticProfileId, List<String> genesetIds, String projection);
+	List<GenesetGeneticAlteration> getGenesetAlterations(String geneticProfileId, List<String> genesetIds, String projection);
 }

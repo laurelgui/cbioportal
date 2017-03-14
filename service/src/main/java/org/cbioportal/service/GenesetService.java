@@ -2,6 +2,7 @@ package org.cbioportal.service;
 
 import java.util.List;
 
+import org.cbioportal.model.Gene;
 import org.cbioportal.model.Geneset;
 import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.service.exception.GenesetNotFoundException;
@@ -14,5 +15,7 @@ public interface GenesetService {
 
     Geneset getGeneset(String genesetId) throws GenesetNotFoundException;
     
+    List<Gene> getGenesByGenesetId(String genesetId);
+
 }
 

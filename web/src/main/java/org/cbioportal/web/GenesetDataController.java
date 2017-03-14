@@ -2,7 +2,7 @@ package org.cbioportal.web;
 
 import java.util.List;
 
-import org.cbioportal.model.GenesetData;
+import org.cbioportal.model.GenesetGeneticData;
 import org.cbioportal.service.GenesetDataService;
 import org.cbioportal.service.exception.GeneticProfileNotFoundException;
 import org.cbioportal.web.config.annotation.PublicApi;
@@ -35,7 +35,7 @@ public class GenesetDataController {
     @RequestMapping(value = "/genetic-profiles/{geneticProfileId}/geneset-data/fetch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Fetch genetic data items by profile Id, gene ids and sample ids")
-    public ResponseEntity<List<GenesetData>> fetchGeneticDataItems(
+    public ResponseEntity<List<GenesetGeneticData>> fetchGeneticDataItems(
     		@ApiParam(required = true, value = "Genetic profile ID, e.g. brca_tcga_gsva_scores")
     		@PathVariable String geneticProfileId,
             @ApiParam(required = true, value = "Search criteria to return the values for a given set of samples and gene set items. "

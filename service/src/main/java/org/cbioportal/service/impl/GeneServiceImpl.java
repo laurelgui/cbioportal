@@ -135,10 +135,4 @@ public class GeneServiceImpl implements GeneService {
     private boolean isInteger(String geneId) {
         return geneId.matches("^-?\\d+$");
     }
-
-	@Override
-	public List<Gene> getGenesByGenesetId(String genesetId) {
-
-		return geneRepository.getGenesByGenesetId(genesetId);
-	}
 }

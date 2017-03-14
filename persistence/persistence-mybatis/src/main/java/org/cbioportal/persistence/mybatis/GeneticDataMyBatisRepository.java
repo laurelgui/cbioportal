@@ -1,7 +1,7 @@
 package org.cbioportal.persistence.mybatis;
 
-import org.cbioportal.model.GeneticAlteration;
-import org.cbioportal.model.GenesetAlteration;
+import org.cbioportal.model.GeneGeneticAlteration;
+import org.cbioportal.model.GenesetGeneticAlteration;
 import org.cbioportal.persistence.GeneticDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -21,14 +21,14 @@ public class GeneticDataMyBatisRepository implements GeneticDataRepository {
     }
 
     @Override
-    public List<GeneticAlteration> getGeneticAlterations(String geneticProfileId, List<Integer> entrezGeneIds, 
+    public List<GeneGeneticAlteration> getGeneticAlterations(String geneticProfileId, List<Integer> entrezGeneIds, 
                                                          String projection) {
 
         return geneticDataMapper.getGeneticAlterations(geneticProfileId, entrezGeneIds, projection);
     }
 
 	@Override
-	public List<GenesetAlteration> getGenesetAlterations(String geneticProfileId, List<String> genesetIds,
+	public List<GenesetGeneticAlteration> getGenesetAlterations(String geneticProfileId, List<String> genesetIds,
 			String projection) {
 		return geneticDataMapper.getGenesetAlterations(geneticProfileId, genesetIds, projection);
 	}

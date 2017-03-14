@@ -2,6 +2,7 @@ package org.cbioportal.service.impl;
 
 import java.util.List;
 
+import org.cbioportal.model.Gene;
 import org.cbioportal.model.Geneset;
 import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.persistence.GenesetRepository;
@@ -37,5 +38,11 @@ public class GenesetServiceImpl implements GenesetService {
             throw new GenesetNotFoundException(genesetId);
         }
         return geneset;
+	}
+	
+	@Override
+	public List<Gene> getGenesByGenesetId(String genesetId) {
+
+		return genesetRepository.getGenesByGenesetId(genesetId);
 	}
 }
