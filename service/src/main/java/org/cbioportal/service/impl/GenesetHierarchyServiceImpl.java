@@ -40,8 +40,7 @@ import org.cbioportal.model.GeneticProfile;
 import org.cbioportal.model.GeneticProfile.DataType;
 import org.cbioportal.model.Sample;
 import org.cbioportal.persistence.GenesetHierarchyRepository;
-import org.cbioportal.persistence.GeneticProfileRepository;
-import org.cbioportal.persistence.SampleListRepository;
+import org.cbioportal.service.SampleListService;
 import org.cbioportal.service.GenesetDataService;
 import org.cbioportal.service.GenesetHierarchyService;
 import org.cbioportal.service.GeneticProfileService;
@@ -62,9 +61,7 @@ public class GenesetHierarchyServiceImpl implements GenesetHierarchyService {
     @Autowired
     private SampleService sampleService;
     @Autowired
-    private SampleListRepository sampleListRepository;
-	@Autowired
-    private GeneticProfileRepository geneticProfileRepository;
+    private SampleListService sampleListService;
 	
 	@Override
 	public List<GenesetHierarchyInfo> fetchGenesetHierarchyInfo(String geneticProfileId, Integer percentile, 
@@ -83,7 +80,7 @@ public class GenesetHierarchyServiceImpl implements GenesetHierarchyService {
 			Double scoreThreshold, Double pvalueThreshold, String sampleListId) throws GeneticProfileNotFoundException {
 		
 		// get sample ids from sampleList
-		List<String> sampleIds = sampleListRepository.getAllSampleIdsInSampleList(sampleListId);		
+		List<String> sampleIds = sampleListService.getAllSampleIdsInSampleList(sampleListId);		
 		return fetchGenesetHierarchyInfo(geneticProfileId, percentile, scoreThreshold, pvalueThreshold, sampleIds);
 	}
 
@@ -116,7 +113,7 @@ public class GenesetHierarchyServiceImpl implements GenesetHierarchyService {
 	 */
 	private List<GenesetGeneticData> getGenesetPvalues(String scoresGeneticProfileId, List<String> sampleIds) throws GeneticProfileNotFoundException {
 
-		List<GeneticProfile> pvaluesGeneticProfiles = geneticProfileRepository.getGeneticProfilesReferringTo(scoresGeneticProfileId);
+		List<GeneticProfile> pvaluesGeneticProfiles = geneticProfileService.getGeneticProfilesReferringTo(scoresGeneticProfileId);
 		//validate : 
 		if (pvaluesGeneticProfiles == null || pvaluesGeneticProfiles.size() != 1) {
 			//unexpected, but could happen if dataset validation is skipped
@@ -286,8 +283,8 @@ public class GenesetHierarchyServiceImpl implements GenesetHierarchyService {
 			String pvalueString = genesetPvalueData.get(i).getValue();
 			
 			if (!NumberUtils.isNumber(scoreString)) 
-    			continue;
-    		
+				continue;
+
 			double score = Double.parseDouble(scoreString);
 			double pvalue = 1.0;
 			if (NumberUtils.isNumber(pvalueString))
@@ -299,10 +296,10 @@ public class GenesetHierarchyServiceImpl implements GenesetHierarchyService {
 			}
 			
 			//keep track of max, in case percentile is null
-    		if (Math.abs(score) > Math.abs(max)) {
-    			max = score; //here no abs, since we want to get the raw score (could be negative)
-    			pvalueOfMax = pvalue;
-    		}
+			if (Math.abs(score) > Math.abs(max)) {
+				max = score; //here no abs, since we want to get the raw score (could be negative)
+				pvalueOfMax = pvalue;
+			}
 		}
 		
 		if (percentile == null) {
@@ -310,8 +307,8 @@ public class GenesetHierarchyServiceImpl implements GenesetHierarchyService {
 			geneset.setRepresentativePvalue(pvalueOfMax);
 		} else {
 			//sort scores:
-			Collections.sort(positiveScoresAndPvalues, ScoreAndPvalue.comparator);
-			Collections.sort(negativeScoresAndPvalues, ScoreAndPvalue.comparatorDesc);
+			positiveScoresAndPvalues.sort((ScoreAndPvalue o1, ScoreAndPvalue o2)-> Double.compare(o1.score, o2.score));
+			negativeScoresAndPvalues.sort((ScoreAndPvalue o1, ScoreAndPvalue o2)-> Double.compare(o2.score, o1.score));
 			
 			//use percentile:
 			ScoreAndPvalue representativePositiveScoreAndPvalue = new ScoreAndPvalue(0, 1);
@@ -350,36 +347,5 @@ public class GenesetHierarchyServiceImpl implements GenesetHierarchyService {
 			this.score = score;
 			this.pvalue = pvalue;
 		}
-		
-		static final Comparator<ScoreAndPvalue> comparator = new Comparator<ScoreAndPvalue>() {
-            @Override
-            public int compare(ScoreAndPvalue o1, ScoreAndPvalue o2) {
-            	
-        		//asc order
-        		if (o1.score < o2.score)
-        			return -1;
-        		if (o1.score > o2.score)
-        			return 1;
-        		
-        		return 0;
-            }
-        };
-        
-        static final Comparator<ScoreAndPvalue> comparatorDesc = new Comparator<ScoreAndPvalue>() {
-            @Override
-            public int compare(ScoreAndPvalue o1, ScoreAndPvalue o2) {
-            	
-        		//asc order
-        		if (o1.score < o2.score)
-        			return 1;
-        		if (o1.score > o2.score)
-        			return -1;
-        		
-        		return 0;
-            }
-        };
-
 	}
-
-	
 }

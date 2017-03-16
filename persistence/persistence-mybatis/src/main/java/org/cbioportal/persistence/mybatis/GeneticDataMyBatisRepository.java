@@ -21,15 +21,15 @@ public class GeneticDataMyBatisRepository implements GeneticDataRepository {
     }
 
     @Override
-    public List<GeneGeneticAlteration> getGeneticAlterations(String geneticProfileId, List<Integer> entrezGeneIds, 
+    public List<GeneGeneticAlteration> getGeneGeneticAlterations(String geneticProfileId, List<Integer> entrezGeneIds, 
                                                          String projection) {
 
-        return geneticDataMapper.getGeneticAlterations(geneticProfileId, entrezGeneIds, projection);
+        return geneticDataMapper.getGeneGeneticAlterations(geneticProfileId, entrezGeneIds, projection);
     }
 
 	@Override
-	public List<GenesetGeneticAlteration> getGenesetAlterations(String geneticProfileId, List<String> genesetIds,
+	public List<GenesetGeneticAlteration> getGenesetGeneticAlterations(String geneticProfileId, List<String> genesetIds,
 			String projection) {
-		return geneticDataMapper.getGenesetAlterations(geneticProfileId, genesetIds, projection);
+		return geneticDataMapper.getGenesetGeneticAlterations(geneticProfileId, genesetIds, projection);
 	}
 }

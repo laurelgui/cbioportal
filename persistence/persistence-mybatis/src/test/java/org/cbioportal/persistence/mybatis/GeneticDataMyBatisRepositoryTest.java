@@ -30,13 +30,13 @@ public class GeneticDataMyBatisRepositoryTest {
     }
 
     @Test
-    public void getGeneticAlterations() throws Exception {
+    public void getGeneGeneticAlterations() throws Exception {
 
         List<Integer> entrezGeneIds = new ArrayList<>();
         entrezGeneIds.add(207);
         entrezGeneIds.add(208);
         
-        List<GeneGeneticAlteration> result = geneticDataMyBatisRepository.getGeneticAlterations("study_tcga_pub_gistic",
+        List<GeneGeneticAlteration> result = geneticDataMyBatisRepository.getGeneGeneticAlterations("study_tcga_pub_gistic",
             entrezGeneIds, "SUMMARY");
         
         Assert.assertEquals(2, result.size());

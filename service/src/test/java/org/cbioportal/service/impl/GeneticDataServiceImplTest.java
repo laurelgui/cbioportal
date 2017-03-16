@@ -59,7 +59,7 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
 
         List<Integer> entrezGeneIds = new ArrayList<>();
         entrezGeneIds.add(ENTREZ_GENE_ID);
-        Mockito.when(geneticDataRepository.getGeneticAlterations(GENETIC_PROFILE_ID, entrezGeneIds, PROJECTION))
+        Mockito.when(geneticDataRepository.getGeneGeneticAlterations(GENETIC_PROFILE_ID, entrezGeneIds, PROJECTION))
             .thenReturn(geneticAlterationList);
 
         List<GeneGeneticData> result = geneticDataService.getGeneticData(GENETIC_PROFILE_ID, SAMPLE_ID, entrezGeneIds, 
@@ -87,7 +87,7 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
 
         List<Integer> entrezGeneIds = new ArrayList<>();
         entrezGeneIds.add(ENTREZ_GENE_ID);
-        Mockito.when(geneticDataRepository.getGeneticAlterations(GENETIC_PROFILE_ID, entrezGeneIds, PROJECTION))
+        Mockito.when(geneticDataRepository.getGeneGeneticAlterations(GENETIC_PROFILE_ID, entrezGeneIds, PROJECTION))
             .thenReturn(geneticAlterationList);
         
         List<Integer> internalIds = new ArrayList<>();

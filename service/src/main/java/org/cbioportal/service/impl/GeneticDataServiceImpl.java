@@ -62,7 +62,7 @@ public class GeneticDataServiceImpl implements GeneticDataService {
             samples = sampleService.fetchSamples(studyIds, sampleIds, "ID");
         }
 
-        List<GeneGeneticAlteration> geneticAlterations = geneticDataRepository.getGeneticAlterations(geneticProfileId,
+        List<GeneGeneticAlteration> geneticAlterations = geneticDataRepository.getGeneGeneticAlterations(geneticProfileId,
             entrezGeneIds, projection);
         
         for (Sample sample : samples) {

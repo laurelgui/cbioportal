@@ -33,7 +33,7 @@ import org.cbioportal.model.GenesetGeneticData;
 import org.cbioportal.model.GeneticProfile;
 import org.cbioportal.model.Sample;
 import org.cbioportal.persistence.GeneticDataRepository;
-import org.cbioportal.persistence.SampleListRepository;
+import org.cbioportal.service.SampleListService;
 import org.cbioportal.service.GenesetDataService;
 import org.cbioportal.service.GeneticProfileService;
 import org.cbioportal.service.SampleService;
@@ -51,7 +51,7 @@ public class GenesetDataServiceImpl implements GenesetDataService {
     @Autowired
     private GeneticProfileService geneticProfileService;
     @Autowired
-    private SampleListRepository sampleListRepository;
+    private SampleListService sampleListService;
 
     @Override
 	public List<GenesetGeneticData> fetchGenesetData(String geneticProfileId, List<String> sampleIds, List<String> genesetIds)
@@ -78,7 +78,7 @@ public class GenesetDataServiceImpl implements GenesetDataService {
             samples = sampleService.fetchSamples(studyIds, sampleIds, "ID");
         }
 
-        List<GenesetGeneticAlteration> genesetAlterations = geneticDataRepository.getGenesetAlterations(geneticProfileId,
+        List<GenesetGeneticAlteration> genesetAlterations = geneticDataRepository.getGenesetGeneticAlterations(geneticProfileId,
         		genesetIds, "SUMMARY");
         
         for (Sample sample : samples) {
@@ -101,7 +101,7 @@ public class GenesetDataServiceImpl implements GenesetDataService {
 	@Override
 	public List<GenesetGeneticData> fetchGenesetData(String geneticProfileId, String sampleListId, List<String> genesetIds) throws GeneticProfileNotFoundException {
 		//get list of samples for given sampleListId:
-		List<String> sampleIds = sampleListRepository.getAllSampleIdsInSampleList(sampleListId);
+		List<String> sampleIds = sampleListService.getAllSampleIdsInSampleList(sampleListId);
 		return fetchGenesetData(geneticProfileId, sampleIds, genesetIds);
 	}
 

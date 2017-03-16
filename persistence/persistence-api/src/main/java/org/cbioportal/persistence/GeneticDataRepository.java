@@ -9,8 +9,8 @@ public interface GeneticDataRepository {
 
     String getCommaSeparatedSampleIdsOfGeneticProfile(String geneticProfileId);
 
-    List<GeneGeneticAlteration> getGeneticAlterations(String geneticProfileId, List<Integer> entrezGeneIds,
+    List<GeneGeneticAlteration> getGeneGeneticAlterations(String geneticProfileId, List<Integer> entrezGeneIds,
                                                   String projection);
 
-	List<GenesetGeneticAlteration> getGenesetAlterations(String geneticProfileId, List<String> genesetIds, String projection);
+	List<GenesetGeneticAlteration> getGenesetGeneticAlterations(String geneticProfileId, List<String> genesetIds, String projection);
 }

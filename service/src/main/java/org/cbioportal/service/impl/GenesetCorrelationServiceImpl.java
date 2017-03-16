@@ -25,8 +25,6 @@ package org.cbioportal.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +40,7 @@ import org.cbioportal.model.GeneGeneticData;
 import org.cbioportal.model.GeneticProfile;
 import org.cbioportal.model.Sample;
 import org.cbioportal.model.GeneticProfile.DataType;
-import org.cbioportal.persistence.SampleListRepository;
+import org.cbioportal.service.SampleListService;
 import org.cbioportal.service.GenesetService;
 import org.cbioportal.service.GenesetCorrelationService;
 import org.cbioportal.service.GenesetDataService;
@@ -56,18 +54,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class GenesetCorrelationServiceImpl implements GenesetCorrelationService {
 
-    @Autowired
-    private GeneticDataService geneticDataService;
-    @Autowired
-    private GenesetDataService genesetDataService;
-    @Autowired
-    private GeneticProfileService geneticProfileService;
-    @Autowired
-    private GenesetService genesetService;
-    @Autowired
-    private SampleService sampleService;
-    @Autowired
-    private SampleListRepository sampleListRepository;
+	@Autowired
+	private GeneticDataService geneticDataService;
+	@Autowired
+	private GenesetDataService genesetDataService;
+	@Autowired
+	private GeneticProfileService geneticProfileService;
+	@Autowired
+	private GenesetService genesetService;
+	@Autowired
+	private SampleService sampleService;
+	@Autowired
+	private SampleListService sampleListService;
 
 
 	@Override
@@ -81,109 +79,105 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 		List<String> sampleIds = samples.stream().map(o -> o.getStableId()).collect( Collectors.toList() );
 		return fetchCorrelatedGenes(genesetId, geneticProfileId, sampleIds, correlationThreshold);
 	}
-	
+
 	@Override
 	public List<GenesetCorrelation> fetchCorrelatedGenes(String genesetId, String geneticProfileId, String sampleListId,
 			double correlationThreshold) throws GeneticProfileNotFoundException {
 
 		// get sample ids from sampleList
-		List<String> sampleIds = sampleListRepository.getAllSampleIdsInSampleList(sampleListId);		
+		List<String> sampleIds = sampleListService.getAllSampleIdsInSampleList(sampleListId);		
 		return fetchCorrelatedGenes(genesetId, geneticProfileId, sampleIds, correlationThreshold);
 	}
-    
+
 	@Override
 	public List<GenesetCorrelation> fetchCorrelatedGenes(String genesetId, String geneticProfileId, List<String> sampleIds,
 			double correlationThreshold) throws GeneticProfileNotFoundException {
 		SpearmansCorrelation spearmansCorrelation = new SpearmansCorrelation();
 		List<GenesetCorrelation> result = new ArrayList<GenesetCorrelation>();
-		
+
 		// find the genes in the geneset
 		List<Gene> genes = genesetService.getGenesByGenesetId(genesetId);
-		
-        // the geneset data:
-        List<GenesetGeneticData> genesetData = genesetDataService.fetchGenesetData(geneticProfileId, sampleIds, Arrays.asList(genesetId));
-        double[] genesetValues = getGenesetValues(sampleIds, genesetData);
-        // find the expression profile related to the given geneticProfileId
-        List<GeneticProfile> expressionProfilesReferredByGenesetProfile = geneticProfileService.getGeneticProfilesReferredBy(geneticProfileId);
-        //we expect only 1 in this case (a geneset only refers to 1 expression profile, so give error otherwise):
-        if (expressionProfilesReferredByGenesetProfile.size() != 1) {
-        	throw new RuntimeException("Unexpected error: given geneset profile refers to " + expressionProfilesReferredByGenesetProfile.size() + " profile(s). Should refer to only 1");
-        }
-        GeneticProfile expressionProfile = expressionProfilesReferredByGenesetProfile.get(0);
-        GeneticProfile zscoresProfile = getLinkedZscoreProfile(expressionProfile);
-        
-        // TODO : if this turns out to take too long, we can always implement this loop in parallel to improve performance. Multi-threading is easy in this scenario.
+
+		// the geneset data:
+		List<GenesetGeneticData> genesetData = genesetDataService.fetchGenesetData(geneticProfileId, sampleIds, Arrays.asList(genesetId));
+		double[] genesetValues = getGenesetValues(sampleIds, genesetData);
+		// find the expression profile related to the given geneticProfileId
+		List<GeneticProfile> expressionProfilesReferredByGenesetProfile = geneticProfileService.getGeneticProfilesReferredBy(geneticProfileId);
+		//we expect only 1 in this case (a geneset only refers to 1 expression profile, so give error otherwise):
+		if (expressionProfilesReferredByGenesetProfile.size() != 1) {
+			throw new RuntimeException("Unexpected error: given geneset profile refers to " + expressionProfilesReferredByGenesetProfile.size() + " profile(s). Should refer to only 1");
+		}
+		GeneticProfile expressionProfile = expressionProfilesReferredByGenesetProfile.get(0);
+		GeneticProfile zscoresProfile = getLinkedZscoreProfile(expressionProfile);
+
+		// TODO : if this turns out to take too long, we can always implement this loop in parallel to improve performance. Multi-threading is easy in this scenario.
 		// get genetic data for each gene and calculate correlation
-        for (Gene gene : genes) {
-        	Integer entrezGeneId = gene.getEntrezGeneId();
-        	List<GeneGeneticData> geneData = geneticDataService.fetchGeneticData(expressionProfile.getStableId(), sampleIds, 
-        			Arrays.asList(entrezGeneId), "SUMMARY");
-        	FilteredGeneAndGenesetValues geneAndGenesetValues = getAndFilterValues(sampleIds, geneData, genesetValues);
-        	
-        	double correlationValue = 0;
-        	// arrays need to be at least 2 long to calculate correlation: 
-        	if (geneAndGenesetValues.geneValues.length > 2) {
-	    		// calculate spearman correlation
-	        	correlationValue = spearmansCorrelation.correlation(geneAndGenesetValues.geneValues, geneAndGenesetValues.genesetValues);
-        	}
-    		// filter out the ones below correlationThreshold
-        	if (Math.abs(correlationValue) < correlationThreshold) {
-        		continue;
-        	}
-        	GenesetCorrelation genesetCorrelationItem = new GenesetCorrelation();
-        	genesetCorrelationItem.setEntrezGeneId(entrezGeneId);
-        	genesetCorrelationItem.setHugoGeneSymbol(gene.getHugoGeneSymbol());
-        	genesetCorrelationItem.setCorrelationValue(correlationValue);
-        	genesetCorrelationItem.setExpressionGeneticProfileId(expressionProfile.getStableId());
-        	genesetCorrelationItem.setzScoreGeneticProfileId(zscoresProfile.getStableId());
-        	result.add(genesetCorrelationItem);
-        }        
+		for (Gene gene : genes) {
+			Integer entrezGeneId = gene.getEntrezGeneId();
+			List<GeneGeneticData> geneData = geneticDataService.fetchGeneticData(expressionProfile.getStableId(), sampleIds, 
+					Arrays.asList(entrezGeneId), "SUMMARY");
+			FilteredGeneAndGenesetValues geneAndGenesetValues = getAndFilterValues(sampleIds, geneData, genesetValues);
+
+			double correlationValue = 0;
+			// arrays need to be at least 2 long to calculate correlation: 
+			if (geneAndGenesetValues.geneValues.length > 2) {
+				// calculate spearman correlation
+				correlationValue = spearmansCorrelation.correlation(geneAndGenesetValues.geneValues, geneAndGenesetValues.genesetValues);
+			}
+			// filter out the ones below correlationThreshold
+			if (Math.abs(correlationValue) < correlationThreshold) {
+				continue;
+			}
+			GenesetCorrelation genesetCorrelationItem = new GenesetCorrelation();
+			genesetCorrelationItem.setEntrezGeneId(entrezGeneId);
+			genesetCorrelationItem.setHugoGeneSymbol(gene.getHugoGeneSymbol());
+			genesetCorrelationItem.setCorrelationValue(correlationValue);
+			genesetCorrelationItem.setExpressionGeneticProfileId(expressionProfile.getStableId());
+			genesetCorrelationItem.setzScoreGeneticProfileId(zscoresProfile.getStableId());
+			result.add(genesetCorrelationItem);
+		}        
 		// return sorted
-        sortResult(result);
+		sortResult(result);
 		return result;
 	}
 
 
 	private GeneticProfile getLinkedZscoreProfile(GeneticProfile expressionProfile) {
-		
+
 		//Find the related z-score profile via the genetic_profile_link table:
-    	List<GeneticProfile> referringProfiles = geneticProfileService.getGeneticProfilesReferringTo(expressionProfile.getStableId());
-    	GeneticProfile zscoresProfile = null;
-    	for (GeneticProfile referringProfile : referringProfiles) {
-    		//use the first z-score profile we can find in this list of referring profiles (normally there should be only 1 anyway):
-    		if (referringProfile.getDatatype().equals(DataType.Z_SCORE)) {
-    			zscoresProfile = referringProfile;
-    			break;
-    		}
-    	}
-    	//if none found, give clear error message...something is wrong with this study:
-        if (zscoresProfile == null) {
-        	throw new IllegalArgumentException("The expression profile [" + expressionProfile.getStableId() + "] linked to the given "
+		List<GeneticProfile> referringProfiles = geneticProfileService.getGeneticProfilesReferringTo(expressionProfile.getStableId());
+		GeneticProfile zscoresProfile = null;
+		for (GeneticProfile referringProfile : referringProfiles) {
+			//use the first z-score profile we can find in this list of referring profiles (normally there should be only 1 anyway):
+			if (referringProfile.getDatatype().equals(DataType.Z_SCORE)) {
+				zscoresProfile = referringProfile;
+				break;
+			}
+		}
+		//if none found, give clear error message...something is wrong with this study:
+		if (zscoresProfile == null) {
+			throw new IllegalArgumentException("The expression profile [" + expressionProfile.getStableId() + "] linked to the given "
 					+ "gene set scores profile does not have a corresponding z-scores profile in this study.");
-        }
-        return zscoresProfile;
+		}
+		return zscoresProfile;
 	}
 
 	private void sortResult(List<GenesetCorrelation> result) {
-        Comparator<GenesetCorrelation> comparator = new Comparator<GenesetCorrelation>() {
-            @Override
-            public int compare(GenesetCorrelation o1, GenesetCorrelation o2) {
-            	
-        		//descending order, also check for NaN
-        		if (o1.getCorrelationValue().isNaN())
-        			return 1;
-        		if (o2.getCorrelationValue().isNaN())
-        			return -1;
-        		
-        		if (o1.getCorrelationValue() < o2.getCorrelationValue())
-        			return 1;
-        		if (o1.getCorrelationValue() > o2.getCorrelationValue())
-        			return -1;
-        		
-        		return 0;
-            }
-        };
-		Collections.sort(result, comparator);		
+
+		result.sort((GenesetCorrelation o1, GenesetCorrelation o2)-> {
+			//descending order, also check for NaN
+			if (o1.getCorrelationValue().isNaN())
+				return 1;
+			if (o2.getCorrelationValue().isNaN())
+				return -1;
+
+			if (o1.getCorrelationValue() < o2.getCorrelationValue())
+				return 1;
+			if (o1.getCorrelationValue() > o2.getCorrelationValue())
+				return -1;
+
+			return 0;
+		});
 	}
 
 
