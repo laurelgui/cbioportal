@@ -92,7 +92,6 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 	@Override
 	public List<GenesetCorrelation> fetchCorrelatedGenes(String genesetId, String geneticProfileId, List<String> sampleIds,
 			double correlationThreshold) throws GeneticProfileNotFoundException {
-		SpearmansCorrelation spearmansCorrelation = new SpearmansCorrelation();
 		List<GenesetCorrelation> result = new ArrayList<GenesetCorrelation>();
 
 		// find the genes in the geneset
@@ -116,14 +115,7 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 			Integer entrezGeneId = gene.getEntrezGeneId();
 			List<GeneGeneticData> geneData = geneticDataService.fetchGeneticData(expressionProfile.getStableId(), sampleIds, 
 					Arrays.asList(entrezGeneId), "SUMMARY");
-			FilteredGeneAndGenesetValues geneAndGenesetValues = getAndFilterValues(sampleIds, geneData, genesetValues);
-
-			double correlationValue = 0;
-			// arrays need to be at least 2 long to calculate correlation: 
-			if (geneAndGenesetValues.geneValues.length > 2) {
-				// calculate spearman correlation
-				correlationValue = spearmansCorrelation.correlation(geneAndGenesetValues.geneValues, geneAndGenesetValues.genesetValues);
-			}
+			double correlationValue = calculateCorrelation(sampleIds, geneData, genesetValues);
 			// filter out the ones below correlationThreshold
 			if (Math.abs(correlationValue) < correlationThreshold) {
 				continue;
@@ -182,24 +174,28 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 
 
 	/**
-	 * Prepares the gene values, but also filters both them and genesetValues, removing samples where the value is not present in 
-	 * either gene or gene set dimension. 
+	 * Calculates the Spearman correlation between the genesetValues list and the list built up from  
+	 * geneGeneticDataItems for the given sampleIds.
 	 * 
-	 * @param sampleIds
-	 * @param geneticDataItems
-	 * @param genesetValues
-	 * @return
+	 * Before calculating the correlation, this method prepares the gene values, filtering both them and genesetValues,
+	 * removing samples where the value is not present in either gene or gene set dimension.
+	 * 
+	 * @param sampleIds: samples over which to calculate correlation
+	 * @param geneGeneticDataItems: gene (expression) values for the set of samples
+	 * @param genesetValues: gene set scores for the set of samples
+	 * 
+	 * @return: Spearman's correlation value between values in geneGeneticDataItems and genesetValues.
 	 */
-	private FilteredGeneAndGenesetValues getAndFilterValues(List<String> sampleIds, List<GeneGeneticData> geneticDataItems, double[] genesetValues) {
+	private double calculateCorrelation(List<String> sampleIds, List<GeneGeneticData> geneGeneticDataItems, double[] genesetValues) {
 		
 		//index geneData values
 		Map<String, Double> sampleValues = new HashMap<String, Double>();
-		for (GeneGeneticData geneticDataItem : geneticDataItems) {
+		for (GeneGeneticData geneGeneticDataItem : geneGeneticDataItems) {
 			double value = Double.NaN;
-			if (NumberUtils.isNumber(geneticDataItem.getValue())) {
-				value = Double.parseDouble(geneticDataItem.getValue());
+			if (NumberUtils.isNumber(geneGeneticDataItem.getValue())) {
+				value = Double.parseDouble(geneGeneticDataItem.getValue());
 			}
-			sampleValues.put(geneticDataItem.getSampleId(), value);
+			sampleValues.put(geneGeneticDataItem.getSampleId(), value);
 		}
 		//get values
 		List<Double> geneValueList = new ArrayList<Double>();
@@ -217,12 +213,17 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 				genesetValueList.add(genesetValues[i]);
 			}
 		}
-		// final result:
-		FilteredGeneAndGenesetValues filteredGeneAndGenesetValues = new FilteredGeneAndGenesetValues(); 
-		filteredGeneAndGenesetValues.geneValues = geneValueList.stream().mapToDouble(d -> d).toArray();
-		filteredGeneAndGenesetValues.genesetValues = genesetValueList.stream().mapToDouble(d -> d).toArray();
-		
-		return filteredGeneAndGenesetValues;
+		// final filtered lists:
+		double[] geneValuesFiltered = geneValueList.stream().mapToDouble(d -> d).toArray();
+		double[] genesetValuesFiltered = genesetValueList.stream().mapToDouble(d -> d).toArray();
+		double correlationValue = 0;
+		// arrays need to be at least 2 long to calculate correlation: 
+		if (geneValuesFiltered.length > 2) {
+			// calculate spearman correlation
+			SpearmansCorrelation spearmansCorrelation = new SpearmansCorrelation();
+			correlationValue = spearmansCorrelation.correlation(geneValuesFiltered, genesetValuesFiltered);
+		}
+		return correlationValue;
 	}
 
 
@@ -249,10 +250,5 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 			}
 		}
 		return result;
-	}
-	
-	class FilteredGeneAndGenesetValues {
-		double[] genesetValues;
-		double[] geneValues;
 	}
 }

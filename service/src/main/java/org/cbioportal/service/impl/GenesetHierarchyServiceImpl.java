@@ -24,14 +24,13 @@ package org.cbioportal.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.cbioportal.model.CancerStudy;
 import org.cbioportal.model.Geneset;
 import org.cbioportal.model.GenesetGeneticData;
@@ -272,10 +271,11 @@ public class GenesetHierarchyServiceImpl implements GenesetHierarchyService {
 		List<GenesetGeneticData> genesetScoreData = genesetScoresMap.get(geneset.getGenesetId());
 		List<GenesetGeneticData> genesetPvalueData = genesetPvaluesMap.get(geneset.getGenesetId());
 		
-		//return the maximum absolute value found:
-		List<ScoreAndPvalue> positiveScoresAndPvalues = new ArrayList<ScoreAndPvalue>();
-		List<ScoreAndPvalue> negativeScoresAndPvalues = new ArrayList<ScoreAndPvalue>();
+		//lists to hold the score and p-value pairs:
+		List<ImmutablePair<Double,Double>> positiveScoresAndPvalues = new ArrayList<ImmutablePair<Double,Double>>();
+		List<ImmutablePair<Double,Double>> negativeScoresAndPvalues = new ArrayList<ImmutablePair<Double,Double>>();
 		
+		//return the maximum absolute value found:
 		double max = 0;
 		double pvalueOfMax = 1;
 		for (int i = 0; i < genesetScoreData.size(); i++) {
@@ -290,9 +290,9 @@ public class GenesetHierarchyServiceImpl implements GenesetHierarchyService {
 			if (NumberUtils.isNumber(pvalueString))
 				pvalue = Double.parseDouble(pvalueString);
 			if (score >= 0) {
-				positiveScoresAndPvalues.add(new ScoreAndPvalue(score, pvalue));
+				positiveScoresAndPvalues.add(new ImmutablePair<Double,Double>(score, pvalue));
 			} else {
-				negativeScoresAndPvalues.add(new ScoreAndPvalue(score, pvalue));
+				negativeScoresAndPvalues.add(new ImmutablePair<Double,Double>(score, pvalue));
 			}
 			
 			//keep track of max, in case percentile is null
@@ -306,13 +306,14 @@ public class GenesetHierarchyServiceImpl implements GenesetHierarchyService {
 			geneset.setRepresentativeScore(max);
 			geneset.setRepresentativePvalue(pvalueOfMax);
 		} else {
-			//sort scores:
-			positiveScoresAndPvalues.sort((ScoreAndPvalue o1, ScoreAndPvalue o2)-> Double.compare(o1.score, o2.score));
-			negativeScoresAndPvalues.sort((ScoreAndPvalue o1, ScoreAndPvalue o2)-> Double.compare(o2.score, o1.score));
+			//sort scores (NB: .getLeft() returns the score, .getRight() returns the pvalue of each pair):
+			positiveScoresAndPvalues.sort((ImmutablePair<Double,Double> o1, ImmutablePair<Double,Double> o2)-> Double.compare(o1.getLeft(), o2.getLeft()));
+			//negative scores descending:
+			negativeScoresAndPvalues.sort((ImmutablePair<Double,Double> o1, ImmutablePair<Double,Double> o2)-> Double.compare(o2.getLeft(), o1.getLeft()));
 			
 			//use percentile:
-			ScoreAndPvalue representativePositiveScoreAndPvalue = new ScoreAndPvalue(0, 1);
-			ScoreAndPvalue representativeNegativeScoreAndPvalue = new ScoreAndPvalue(0, 1);
+			ImmutablePair<Double,Double> representativePositiveScoreAndPvalue = new ImmutablePair<Double,Double>(0.0, 1.0);
+			ImmutablePair<Double,Double> representativeNegativeScoreAndPvalue = new ImmutablePair<Double,Double>(0.0, 1.0);
 			if (positiveScoresAndPvalues.size() > 0) {
 				int idxPositiveScores = (int)Math.round(percentile * positiveScoresAndPvalues.size() / 100.0);
 				representativePositiveScoreAndPvalue = positiveScoresAndPvalues.get(idxPositiveScores-1);
@@ -323,29 +324,13 @@ public class GenesetHierarchyServiceImpl implements GenesetHierarchyService {
 			}
 			
 			//set best one:
-			if (Math.abs(representativePositiveScoreAndPvalue.score) > Math.abs(representativeNegativeScoreAndPvalue.score)) {
-				geneset.setRepresentativeScore(representativePositiveScoreAndPvalue.score);
-				geneset.setRepresentativePvalue(representativePositiveScoreAndPvalue.pvalue);
+			if (Math.abs(representativePositiveScoreAndPvalue.getLeft()) > Math.abs(representativeNegativeScoreAndPvalue.getLeft())) {
+				geneset.setRepresentativeScore(representativePositiveScoreAndPvalue.getLeft());
+				geneset.setRepresentativePvalue(representativePositiveScoreAndPvalue.getRight());
 			} else {
-				geneset.setRepresentativeScore(representativeNegativeScoreAndPvalue.score);
-				geneset.setRepresentativePvalue(representativeNegativeScoreAndPvalue.pvalue);
+				geneset.setRepresentativeScore(representativeNegativeScoreAndPvalue.getLeft());
+				geneset.setRepresentativePvalue(representativeNegativeScoreAndPvalue.getRight());
 			}
-		}
-	}
-
-	/**
-	 * Inner class to hold score and p-value tuple. 
-	 * 
-	 * @author pieter
-	 *
-	 */
-	static class ScoreAndPvalue {
-
-		double score;
-		double pvalue;
-		public ScoreAndPvalue(double score, double pvalue) {
-			this.score = score;
-			this.pvalue = pvalue;
 		}
 	}
 }
