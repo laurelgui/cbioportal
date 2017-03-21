@@ -1,7 +1,6 @@
 package org.cbioportal.model;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 public abstract class GeneticData implements Serializable {
 
