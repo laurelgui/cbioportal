@@ -49,6 +49,7 @@ import org.cbioportal.service.GeneticProfileService;
 import org.cbioportal.service.SampleService;
 import org.cbioportal.service.exception.GeneticProfileNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -68,7 +69,7 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 	private SampleListService sampleListService;
 
 
-	@Override
+	@PreAuthorize("hasPermission(#geneticProfileId, 'GeneticProfile', 'read')")
 	public List<GenesetCorrelation> fetchCorrelatedGenes(String genesetId, String geneticProfileId,
 			double correlationThreshold) throws GeneticProfileNotFoundException {
 
@@ -80,7 +81,7 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 		return fetchCorrelatedGenes(genesetId, geneticProfileId, sampleIds, correlationThreshold);
 	}
 
-	@Override
+	@PreAuthorize("hasPermission(#geneticProfileId, 'GeneticProfile', 'read')")
 	public List<GenesetCorrelation> fetchCorrelatedGenes(String genesetId, String geneticProfileId, String sampleListId,
 			double correlationThreshold) throws GeneticProfileNotFoundException {
 
@@ -89,7 +90,7 @@ public class GenesetCorrelationServiceImpl implements GenesetCorrelationService 
 		return fetchCorrelatedGenes(genesetId, geneticProfileId, sampleIds, correlationThreshold);
 	}
 
-	@Override
+	@PreAuthorize("hasPermission(#geneticProfileId, 'GeneticProfile', 'read')")
 	public List<GenesetCorrelation> fetchCorrelatedGenes(String genesetId, String geneticProfileId, List<String> sampleIds,
 			double correlationThreshold) throws GeneticProfileNotFoundException {
 		List<GenesetCorrelation> result = new ArrayList<GenesetCorrelation>();

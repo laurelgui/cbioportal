@@ -39,6 +39,7 @@ import org.cbioportal.service.GeneticProfileService;
 import org.cbioportal.service.SampleService;
 import org.cbioportal.service.exception.GeneticProfileNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -53,7 +54,7 @@ public class GenesetDataServiceImpl implements GenesetDataService {
     @Autowired
     private SampleListService sampleListService;
 
-    @Override
+    @PreAuthorize("hasPermission(#geneticProfileId, 'GeneticProfile', 'read')")
 	public List<GenesetGeneticData> fetchGenesetData(String geneticProfileId, List<String> sampleIds, List<String> genesetIds)
 			throws GeneticProfileNotFoundException {
 
@@ -98,11 +99,10 @@ public class GenesetDataServiceImpl implements GenesetDataService {
         return genesetDataList;
     }
 
-	@Override
-	public List<GenesetGeneticData> fetchGenesetData(String geneticProfileId, String sampleListId, List<String> genesetIds) throws GeneticProfileNotFoundException {
-		//get list of samples for given sampleListId:
-		List<String> sampleIds = sampleListService.getAllSampleIdsInSampleList(sampleListId);
-		return fetchGenesetData(geneticProfileId, sampleIds, genesetIds);
-	}
-
+    @PreAuthorize("hasPermission(#geneticProfileId, 'GeneticProfile', 'read')")
+    public List<GenesetGeneticData> fetchGenesetData(String geneticProfileId, String sampleListId, List<String> genesetIds) throws GeneticProfileNotFoundException {
+        //get list of samples for given sampleListId:
+        List<String> sampleIds = sampleListService.getAllSampleIdsInSampleList(sampleListId);
+        return fetchGenesetData(geneticProfileId, sampleIds, genesetIds);
+    }
 }
