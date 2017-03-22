@@ -25,19 +25,19 @@ import io.swagger.annotations.ApiParam;
 @PublicApi
 @RestController
 @Validated
-@Api(tags = "Gene set Data", description = " ")
+@Api(tags = "Gene Set Genetic Data", description = " ")
 public class GenesetDataController {
 
 
 	@Autowired
     private GenesetDataService genesetDataService;
     
-    @RequestMapping(value = "/genetic-profiles/{geneticProfileId}/geneset-data/fetch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+    @RequestMapping(value = "/genetic-profiles/{geneticProfileId}/geneset-genetic-data/fetch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation("Fetch genetic data items by profile Id, gene ids and sample ids")
+    @ApiOperation("Fetch gene set \"genetic data\" items (gene set scores) by profile Id, gene set ids and sample ids")
     public ResponseEntity<List<GenesetGeneticData>> fetchGeneticDataItems(
-    		@ApiParam(required = true, value = "Genetic profile ID, e.g. brca_tcga_gsva_scores")
-    		@PathVariable String geneticProfileId,
+            @ApiParam(required = true, value = "Genetic profile ID, e.g. gbm_tcga_gsva_scores")
+            @PathVariable String geneticProfileId,
             @ApiParam(required = true, value = "Search criteria to return the values for a given set of samples and gene set items. "
             		+ "genesetIds: The list of identifiers for the gene sets of interest, e.g. HINATA_NFKB_MATRIX. "
             		+ "Use one of these if you want to specify a subset of samples:"

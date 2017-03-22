@@ -51,7 +51,7 @@ import io.swagger.annotations.ApiParam;
 @InternalApi
 @RestController
 @Validated
-@Api(tags = "Gene set correlation", description = " ")
+@Api(tags = "Gene Set Correlation", description = " ")
 public class GenesetCorrelationController {
 
     @Autowired
@@ -59,11 +59,11 @@ public class GenesetCorrelationController {
 
     @RequestMapping(value = "/genesets/{genesetId}/expression-correlation/fetch", method = RequestMethod.POST,
         consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation("Get the genes in a gene set that have expression correlated to the gene set scores")
+    @ApiOperation("Get the genes in a gene set that have expression correlated to the gene set scores (calculated using Spearman's correlation)")
     public ResponseEntity<List<GenesetCorrelation>> fetchCorrelatedGenes(
     	@ApiParam(required = true, value = "Gene set ID, e.g. HINATA_NFKB_MATRIX.")
         @PathVariable String genesetId,
-        @ApiParam(required = true, value = "Genetic Profile ID e.g. brca_tcga_gsva_scores")
+        @ApiParam(required = true, value = "Genetic Profile ID e.g. gbm_tcga_gsva_scores")
     	@RequestParam String geneticProfileId,
     	@ApiParam("Correlation threshold (for absolute correlation value, Spearman correlation)")
         @Max(1)

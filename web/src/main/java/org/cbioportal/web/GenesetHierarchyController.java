@@ -50,19 +50,19 @@ import io.swagger.annotations.ApiParam;
 @InternalApi
 @RestController
 @Validated
-@Api(tags = "Gene set hierarchy", description = " ")
+@Api(tags = "Gene Set Hierarchy", description = " ")
 public class GenesetHierarchyController {
 
     @Autowired
     private GenesetHierarchyService genesetHierarchyService;
 
-    @RequestMapping(value = "/genesets/hierarchy/fetch", method = RequestMethod.POST,
+    @RequestMapping(value = "/geneset-hierarchy/fetch", method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get gene set hierarchical organization information. I.e. how different gene sets relate to other gene sets, in a hierarchy")
     public ResponseEntity<List<GenesetHierarchyInfo>> fetchGenesetHierarchyInfo(
-		@ApiParam(required = true, value = "Genetic Profile ID e.g. brca_tcga_gsva_scores. The final hierarchy "
-				+ " will only include gene sets scored in the specified profile.")
-    	@RequestParam String geneticProfileId,
+        @ApiParam(required = true, value = "Genetic Profile ID e.g. gbm_tcga_gsva_scores. The final hierarchy "
+                + " will only include gene sets scored in the specified profile.")
+        @RequestParam String geneticProfileId,
         @ApiParam("Percentile (for score calculation). Which percentile to use when determining the *representative score*")
         @Max(100)
         @Min(1)
@@ -71,12 +71,12 @@ public class GenesetHierarchyController {
         @Max(1)
         @Min(0)
         @RequestParam(defaultValue = "0.4") Double scoreThreshold,
-    	@ApiParam("p-value threshold. Filters out gene sets for which the score p-value is higher than this threshold.")
+        @ApiParam("p-value threshold. Filters out gene sets for which the score p-value is higher than this threshold.")
         @Max(1)
         @Min(0)
         @RequestParam(defaultValue = "0.05") Double pvalueThreshold,
         @ApiParam(required = false, value = "Identifier of pre-defined sample list with samples to query, e.g. brca_tcga_all")
-    	@RequestParam(required = false) String sampleListId,
+        @RequestParam(required = false) String sampleListId,
         @ApiParam(required = false, value = "Fill this one if you want to specify a subset of samples:"
         		+ " sampleIds: custom list of samples or patients to query, e.g. [\"TCGA-A1-A0SD-01\", \"TCGA-A1-A0SE-01\"]")
         @RequestBody(required = false) List<String> sampleIds)
