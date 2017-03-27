@@ -66,7 +66,7 @@ public class DaoGeneset {
             int rows = 0;
             
             // new geneset so add genetic entity first
-            int geneticEntityId = DaoGeneticEntity.addNewGeneticEntity(DaoGeneticEntity.EntityTypes.GENE_SET);
+            int geneticEntityId = DaoGeneticEntity.addNewGeneticEntity(DaoGeneticEntity.EntityTypes.GENESET);
             geneset.setGeneticEntityId(geneticEntityId);
             
             con = JdbcUtil.getDbConnection(DaoGeneset.class);
@@ -272,7 +272,7 @@ public class DaoGeneset {
         ResultSet rs = null;
         try {
             con = JdbcUtil.getDbConnection(DaoGeneset.class);
-            pstmt = con.prepareStatement("SELECT ID FROM genetic_entity WHERE ENTITY_TYPE = 'GENE_SET'");
+            pstmt = con.prepareStatement("SELECT ID FROM genetic_entity WHERE ENTITY_TYPE = 'GENESET'");
             rs = pstmt.executeQuery();
             
             Set<Long> geneticEntities = new HashSet<Long>();
@@ -356,7 +356,7 @@ public class DaoGeneset {
         ResultSet rs = null;
         try {
             con = JdbcUtil.getDbConnection(DaoGeneset.class);
-            pstmt = con.prepareStatement("DELETE FROM genetic_entity WHERE ENTITY_TYPE = 'GENE_SET'");
+            pstmt = con.prepareStatement("DELETE FROM genetic_entity WHERE ENTITY_TYPE = 'GENESET'");
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new DaoException(e);

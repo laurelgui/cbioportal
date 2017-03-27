@@ -502,7 +502,7 @@ public class ImportTabDelimData {
             Geneset geneset = DaoGeneset.getGenesetByExternalId(parts[genesetIdIndex]);
             if (geneset !=  null) {
                 storedRecord = storeGeneticEntityGeneticAlterations(values, daoGeneticAlteration, geneset.getGeneticEntityId(), 
-                        DaoGeneticEntity.EntityTypes.GENE_SET, geneset.getExternalId());
+                        DaoGeneticEntity.EntityTypes.GENESET, geneset.getExternalId());
             }
             else {
                 ProgressMonitor.logWarning("Geneset " + parts[genesetIdIndex] + " not found in DB. Record will be skipped.");
@@ -542,8 +542,8 @@ public class ImportTabDelimData {
      * @param values
      * @param daoGeneticAlteration
      * @param geneticEntityId - internal id for genetic entity
-     * @param geneticEntityType - "GENE", "GENE_SET", "PHOSPHOPROTEIN"
-     * @param geneticEntityName - hugo symbol for "GENE", external id for "GENE_SET", phospho gene name for "PHOSPHOPROTEIN"
+     * @param geneticEntityType - "GENE", "GENESET", "PHOSPHOPROTEIN"
+     * @param geneticEntityName - hugo symbol for "GENE", external id for "GENESET", phospho gene name for "PHOSPHOPROTEIN"
      * @return boolean indicating if record was stored successfully or not
      */
     private boolean storeGeneticEntityGeneticAlterations(String[] values, DaoGeneticAlteration daoGeneticAlteration,
